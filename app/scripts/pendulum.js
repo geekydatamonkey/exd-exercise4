@@ -13,6 +13,7 @@ class Pendulum {
       velocity: 0,
       gravity: 1,
       damping: 1, // no damping
+      color: 'black',
       sketch: null
     };
 
@@ -24,6 +25,7 @@ class Pendulum {
     this.velocity = config.velocity;
     this.gravity = config.gravity;
     this.damping = config.damping;
+    this.color = config.color;
     this.sketch = config.sketch;
   }
 
@@ -51,31 +53,33 @@ class Pendulum {
     return Math.sqrt(dx*dx + dy*dy);
   }
 
+  set radius(r) {
+    let dx = r * Math.sin(this.angle);
+    let dy = r * Math.cos(this.angle);
+
+    this.position = {
+      x: this.origin.x + dx,
+      y: this.origin.y + dy
+    };
+  }
 
   update() {
     this.acceleration = -1 * this.gravity / this.radius * Math.sin(this.angle);
     this.velocity += this.acceleration;
-
-    console.log(this.angle);
     this.angle += this.velocity;
 
     // apply damping
     this.velocity *= this.damping;
-
   }
 
   render(){
     let s = this.sketch;
-    s.fill(0);
-
-    // origin
-    s.ellipse(this.origin.x, this.origin.y, 5, 5);
-
-    // plumbob
-    s.ellipse(this.position.x, this.position.y, 30, 30);
-
-    // string
-    s.line(this.origin.x, this.origin.y, this.position.x, this.position.y);
+    s.push();
+    s.fill(this.color);
+    s.line(this.origin.x, this.origin.y, this.position.x, this.position.y);     // string
+    s.ellipse(this.origin.x, this.origin.y, 5, 5);     // origin
+    s.ellipse(this.position.x, this.position.y, 30, 30);    // plumbob
+    s.pop();
   }
 
 }

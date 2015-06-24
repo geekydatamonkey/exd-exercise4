@@ -4,12 +4,42 @@
 'use strict';
 const p5 = require('p5');
 const $ = require('jquery');
+const _ = require('lodash');
 const Pendulum = require('./pendulum');
 
-// pendulum
-let p;
+let pendulumList = [];
+let paused = false;
+let timeoutID;
 
 function mySketch(s){
+
+  function addAPendulum() {
+    if (paused) {
+      window.clearTimeout(timeoutID);
+      return;
+    }
+
+    if (pendulumList.length >= 60) {
+      pendulumList = [];
+    }
+
+    let x = (pendulumList.length % 10)/10 * s.width;
+    let y = Math.floor(pendulumList.length/10)/6 * s.height;
+
+    let p = new Pendulum({
+      origin: {x, y},
+      position: {x: x - 100, y: y + 100},
+      sketch: s,
+      gravity: 1.4,
+      damping: 0.999
+    });
+
+    pendulumList.push(p);
+
+    // recursively set another timeout
+    timeoutID = window.setTimeout(addAPendulum,1000);
+
+  }
 
   s.setup = function (){
 
@@ -21,19 +51,20 @@ function mySketch(s){
       $canvasWrapper.innerHeight()
     ).parent($canvasWrapper[0]);
 
-    p = new Pendulum({
-      origin: {x: 400, y: 100},
-      position: {x: 200, y: 300},
-      sketch: s
-    });
-    console.log(p);
+    // kick off the pendulum adding
+    addAPendulum();
 
   };
 
   s.draw = function() {
     s.clear();
-    p.update();
-    p.render();
+    for (let i=0, len = pendulumList.length; i<len; i++) {
+      let p = pendulumList[i];
+      if (!paused) {
+        p.update();
+      }
+      p.render();
+    }
   };
 
   s.windowResized = function() {
@@ -46,11 +77,30 @@ function mySketch(s){
     s.resizeCanvas(w,h-3);
   };
 
-  s.mousePressed = function() {};
+  s.mouseDragged = function() {
+    paused = true;
+
+    _.each(pendulumList, function(p) {
+
+      // moving up?
+      if (s.mouseY - s.pmouseY < 0) {
+        p.radius -=1;
+      }
+
+      // moving down?
+      if (s.mouseY - s.pmouseY > 0) {
+        p.radius += 1;
+      }
+    });
+
+  };
+
+  s.mouseReleased = function() {
+    paused = false;
+    timeoutID = window.setTimeout(addAPendulum, 1000);
+  };
 
 }
-
-
 
 function init() {
   return new p5(mySketch);
