@@ -13,7 +13,7 @@ let timeoutID;
 
 function mySketch(s){
 
-  function addAPendulum() {
+  function addPendulum() {
     if (paused) {
       window.clearTimeout(timeoutID);
       return;
@@ -37,8 +37,7 @@ function mySketch(s){
     pendulumList.push(p);
 
     // recursively set another timeout
-    timeoutID = window.setTimeout(addAPendulum,1000);
-
+    timeoutID = window.setTimeout(addPendulum,1000);
   }
 
   s.setup = function (){
@@ -52,7 +51,7 @@ function mySketch(s){
     ).parent($canvasWrapper[0]);
 
     // kick off the pendulum adding
-    addAPendulum();
+    addPendulum();
 
   };
 
@@ -97,7 +96,7 @@ function mySketch(s){
 
   s.mouseReleased = function() {
     paused = false;
-    timeoutID = window.setTimeout(addAPendulum, 1000);
+    timeoutID = window.setTimeout(addPendulum, 1000);
   };
 
 }
